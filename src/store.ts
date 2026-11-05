@@ -96,7 +96,7 @@ export function demoCoins(): LaunchRecord[] {
     progress: number;
     minutesAgo: number;
   }> = [
-    { name: 'Pumping Cat', symbol: 'PUMPCAT', description: 'Kucing yang menekan tombol pump.', mcapSol: 412, progress: 0.87, minutesAgo: 24 },
+    { name: 'Pumping Cat', symbol: 'PUMPCAT', description: 'Kucing yang menekan tombol pump.', mcapSol: 612, progress: 1, minutesAgo: 24 },
     { name: 'Solana Rats', symbol: 'RATS', description: 'Tikus jalanan yang paham chart.', mcapSol: 96, progress: 0.34, minutesAgo: 7 },
     { name: 'Moon Sate', symbol: 'SATE', description: 'Sate madura tapi on-chain.', mcapSol: 58, progress: 0.21, minutesAgo: 12 },
     { name: 'Based Ketoprak', symbol: 'KTPRK', description: 'Ketoprak dengan likuiditas dalam.', mcapSol: 27, progress: 0.11, minutesAgo: 41 },

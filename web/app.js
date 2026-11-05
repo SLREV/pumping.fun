@@ -541,17 +541,20 @@
     updateCode();
   }
 
+  /** Estimasi kasar sebelum /api/quote menjawab (rumus sama dengan src/curve.ts). */
   function localQuote(devBuySol) {
-    const virtualSol = 30 + devBuySol * 0.99;
-    const virtualToken = 1_073_000_000 - devBuySol * 0.99 * 1_000_000_000 / 30;
-    const price = virtualSol / virtualToken;
-    const tokensOut = (devBuySol * 0.99 * 1_000_000_000) / price;
-    const mcapSol = price * 1_000_000_000;
+    const netSol = devBuySol * 0.99;
+    const startVirtualSol = 30;
+    const startVirtualToken = 1_073_000_000;
+    const solAfter = startVirtualSol + netSol;
+    const tokenAfter = (startVirtualSol * startVirtualToken) / solAfter;
+    const tokensOut = startVirtualToken - tokenAfter;
+    const price = solAfter / tokenAfter;
     return {
       tokensOut,
-      marketCapSol: mcapSol,
+      marketCapSol: price * 1_000_000_000,
       priceSol: price,
-      progress: (devBuySol * 0.99) / 85,
+      progress: netSol / 85,
     };
   }
 
