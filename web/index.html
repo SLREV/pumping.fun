@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>pumping.fun — luncurkan memecoin di Solana</title>
+<meta name="description" content="Dashboard & launcher token memecoin di pump.fun. Dibuat dengan SDK resmi pump.fun: satu klik, langsung bonding curve." />
+<meta name="theme-color" content="#050a08" />
+<link rel="icon" id="favicon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%2300e07a'/%3E%3Cpath d='M30 74V26h22a16 16 0 0 1 0 32H42v16z' fill='%23061410'/%3E%3C/svg%3E" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="glow glow-a" aria-hidden="true"></div>
+<div class="glow glow-b" aria-hidden="true"></div>
+
+<!-- ─────────────────────────── HEADER ─────────────────────────── -->
+<header class="topbar">
+  <a class="brand" href="#top" aria-label="pumping.fun">
+    <span class="brand-mark" aria-hidden="true">
+      <svg viewBox="0 0 100 100" width="30" height="30"><rect width="100" height="100" rx="26" fill="currentColor"/><path d="M32 76V24h20a17 17 0 0 1 0 34H44v18z" fill="#04120c"/></svg>
+    </span>
+    <span class="brand-text">pumping<span>.fun</span></span>
+  </a>
+
+  <nav class="nav" aria-label="Navigasi utama">
+    <a href="#board" class="nav-link">Trending</a>
+    <a href="#create" class="nav-link">Buat Coin</a>
+    <a href="#how" class="nav-link">Cara Kerja</a>
+    <a href="#api" class="nav-link">API</a>
+  </nav>
+
+  <div class="topbar-right">
+    <button class="chain-badge" id="chainBadge" type="button" title="Status jaringan">
+      <span class="dot" id="chainDot"></span>
+      <span id="chainLabel">menghubungkan…</span>
+    </button>
+    <button class="wallet-chip" id="walletChip" type="button" title="Wallet launcher">
+      <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M4 6h13a3 3 0 0 1 3 3v1h-3a3 3 0 0 0 0 6h3v1a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3h10"/></svg>
+      <span id="walletLabel">Wallet</span>
+    </button>
+    <a class="btn btn-primary btn-sm" href="#create">
+      <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6z"/></svg>
+      Buat Coin
+    </a>
+  </div>
+</header>
+
+<main id="top">
+  <!-- ─────────────────────────── HERO ─────────────────────────── -->
+  <section class="hero">
+    <div class="hero-copy">
+      <span class="eyebrow"><span class="pulse"></span> SOLANA · SDK RESMI PUMP.FUN</span>
+      <h1>Luncurkan memecoin<br /><em>dalam 12 detik.</em></h1>
+      <p class="lede">
+        Tanpa menulis kontrak sendiri, tanpa deploy manual. Satu form, satu transaksi
+        <code>create_v2</code> — token langsung punya bonding curve, chart, dan bisa dibeli siapa pun.
+      </p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="#create">
+          Mulai launch
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M13.2 5.8 19.4 12l-6.2 6.2-1.4-1.4 3.8-3.8H4v-2h11.6L11.8 7.2z"/></svg>
+        </a>
+        <a class="btn btn-ghost" href="#board">Lihat papan coin</a>
+      </div>
+      <dl class="hero-stats">
+        <div><dt>Coin di papan</dt><dd id="statLaunched">—</dd></div>
+        <div><dt>Graduated</dt><dd id="statGraduated">—</dd></div>
+        <div><dt>Dev wallet</dt><dd id="statWallet">—</dd></div>
+        <div><dt>Program</dt><dd class="mono-sm">6EF8…F6P</dd></div>
+      </dl>
+    </div>
+
+    <div class="hero-visual">
+      <div class="ticket" id="heroTicket">
+        <div class="ticket-top">
+          <span class="ticket-tag">LIVE CURVE</span>
+          <span class="ticket-net" id="ticketNet">mainnet-beta</span>
+        </div>
+        <div class="ticket-body">
+          <div class="ticket-coin">
+            <div class="avatar avatar-lg" id="ticketAvatar">🐸</div>
+            <div>
+              <strong id="ticketName">Pumping Cat</strong>
+              <span class="mono muted" id="ticketSymbol">$PUMPCAT</span>
+            </div>
+          </div>
+          <div class="ticket-price">
+            <span class="label">Market cap</span>
+            <strong id="ticketMcap">$61.7K</strong>
+            <span class="delta up" id="ticketDelta">+12.4%</span>
+          </div>
+        </div>
+        <canvas id="ticketChart" width="520" height="150" aria-hidden="true"></canvas>
+        <div class="ticket-foot">
+          <div class="progress">
+            <div class="progress-bar" id="ticketProgress" style="width:87%"></div>
+          </div>
+          <div class="ticket-foot-row">
+            <span class="mono" id="ticketProgressLabel">87% menuju Raydium</span>
+            <span class="muted mono" id="ticketMcapSol">412 SOL</span>
+          </div>
+        </div>
+      </div>
+      <div class="floating-card" id="floatingCard">
+        <span class="dot"></span>
+        <div>
+          <strong>create_v2</strong>
+          <span class="mono muted">1 tx · 0.002 SOL fee</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────── MARQUEE ─────────────────────────── -->
+  <div class="marquee-wrap" aria-hidden="true">
+    <div class="marquee" id="marquee"></div>
+  </div>
+
+  <!-- ─────────────────────────── BOARD ─────────────────────────── -->
+  <section class="section board" id="board">
+    <div class="section-head">
+      <div>
+        <h2>Papan peluncuran</h2>
+        <p class="section-sub">Data contoh + coin yang kamu buat dari dashboard ini.</p>
+      </div>
+      <div class="board-tools">
+        <div class="search">
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M10 4a6 6 0 1 0 3.7 10.7l4.3 4.3 1.4-1.4-4.3-4.3A6 6 0 0 0 10 4m0 2a4 4 0 1 1 0 8 4 4 0 0 1 0-8"/></svg>
+          <input id="search" type="search" placeholder="Cari nama atau ticker…" autocomplete="off" />
+        </div>
+        <div class="tabs" id="tabs" role="tablist">
+          <button class="tab is-active" data-tab="trending" role="tab">Trending</button>
+          <button class="tab" data-tab="new" role="tab">Baru</button>
+          <button class="tab" data-tab="hot" role="tab">Hampir lulus</button>
+          <button class="tab" data-tab="graduated" role="tab">Graduated</button>
+        </div>
+      </div>
+    </div>
+    <div class="coin-grid" id="coinGrid">
+      <!-- kartu coin dirender oleh app.js -->
+    </div>
+    <p class="empty" id="emptyState" hidden>Tidak ada coin yang cocok. Coba kata kunci lain.</p>
+  </section>
+
+  <!-- ─────────────────────────── CREATE ─────────────────────────── -->
+  <section class="section create" id="create">
+    <div class="section-head">
+      <div>
+        <h2>Buat coin baru</h2>
+        <p class="section-sub">Isi form, lihat preview-nya, lalu kirim satu transaksi.</p>
+      </div>
+      <span class="mode-pill" id="modePill">memeriksa mode…</span>
+    </div>
+
+    <div class="create-grid">
+      <!-- FORM -->
+      <form class="panel form" id="launchForm" novalidate>
+        <fieldset class="fieldset">
+          <legend>1 · Identitas coin</legend>
+
+          <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Upload gambar coin">
+            <input type="file" id="fileInput" accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml" hidden />
+            <div class="dropzone-inner">
+              <div class="dropzone-preview" id="dropPreview">P</div>
+              <div class="dropzone-text">
+                <strong>Gambar coin</strong>
+                <span class="muted">PNG/JPG/GIF/WEBP, maks 4 MB. Tarik ke sini atau klik.</span>
+                <span class="link-mini" id="removeImage" hidden>hapus gambar</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <label class="field">
+              <span>Nama coin <i>*</i></span>
+              <input id="name" name="name" maxlength="32" placeholder="Pumping Cat" required />
+              <small class="counter"><span id="nameCount">0</span>/32</small>
+            </label>
+            <label class="field">
+              <span>Ticker <i>*</i></span>
+              <div class="input-prefix">
+                <span>$</span>
+                <input id="symbol" name="symbol" maxlength="10" placeholder="PUMPCAT" required />
+              </div>
+            </label>
+          </div>
+
+          <label class="field">
+            <span>Deskripsi</span>
+            <textarea id="description" name="description" rows="3" maxlength="500" placeholder="Ceritakan kenapa coin ini layak di-pump…"></textarea>
+            <small class="counter"><span id="descCount">0</span>/500</small>
+          </label>
+
+          <div class="grid-3">
+            <label class="field">
+              <span>Twitter / X</span>
+              <input id="twitter" name="twitter" placeholder="x.com/akun" />
+            </label>
+            <label class="field">
+              <span>Telegram</span>
+              <input id="telegram" name="telegram" placeholder="t.me/grup" />
+            </label>
+            <label class="field">
+              <span>Website</span>
+              <input id="website" name="website" placeholder="situs.xyz" />
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset class="fieldset">
+          <legend>2 · Pembelian awal (dev buy)</legend>
+          <div class="devbuy-head">
+            <label class="field field-buy">
+              <span>Jumlah SOL saat launch</span>
+              <input id="devBuy" name="devBuy" type="number" min="0" max="5" step="0.01" value="0.5" />
+            </label>
+            <div class="quick-buys" id="quickBuys">
+              <button type="button" data-sol="0">0</button>
+              <button type="button" data-sol="0.1">0.1</button>
+              <button type="button" data-sol="0.5" class="is-active">0.5</button>
+              <button type="button" data-sol="1">1</button>
+              <button type="button" data-sol="2">2</button>
+            </div>
+          </div>
+          <div class="estimate" id="estimate">
+            <div><span class="muted">Token diterima</span><strong id="estTokens">—</strong></div>
+            <div><span class="muted">Market cap awal</span><strong id="estMcap">—</strong></div>
+            <div><span class="muted">Harga per token</span><strong id="estPrice">—</strong></div>
+            <div><span class="muted">Biaya jaringan (≈)</span><strong id="estFee">0.0020 SOL</strong></div>
+          </div>
+        </fieldset>
+
+        <fieldset class="fieldset">
+          <legend>
+            3 · Pengaturan lanjutan
+            <button type="button" class="link-mini" id="advancedToggle" aria-expanded="false">tampilkan</button>
+          </legend>
+          <div class="advanced" id="advanced" hidden>
+            <label class="field">
+              <span>Creator fee <b id="creatorFeeLabel">0 bps</b></span>
+              <input id="creatorFee" type="range" min="0" max="500" step="10" value="0" />
+              <small class="muted">Fee yang kamu terima dari setiap trade (0–5%).</small>
+            </label>
+            <label class="field">
+              <span>Slippage dev buy <b id="slippageLabel">1.0%</b></span>
+              <input id="slippage" type="range" min="10" max="1000" step="10" value="100" />
+            </label>
+            <div class="grid-2">
+              <label class="toggle">
+                <input type="checkbox" id="mayhem" />
+                <span class="toggle-track"></span>
+                <span class="toggle-label">Mayhem mode<small class="muted">Parameter curve acak (jika diaktifkan program).</small></span>
+              </label>
+              <label class="toggle">
+                <input type="checkbox" id="holderReward" />
+                <span class="toggle-track"></span>
+                <span class="toggle-label">Holder reward<small class="muted">Creator fee dibagi ke holder.</small></span>
+              </label>
+            </div>
+          </div>
+        </fieldset>
+
+        <div class="form-foot">
+          <button class="btn btn-primary btn-block" type="submit" id="submitBtn">
+            <span id="submitLabel">Luncurkan coin</span>
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M4 20V4l18 8z"/></svg>
+          </button>
+          <p class="fineprint">
+            Dengan menekan tombol ini kamu membuat transaksi on-chain yang tidak bisa dibatalkan.
+            Biaya jaringan & fee pump.fun ditanggung wallet launcher.
+          </p>
+        </div>
+      </form>
+
+      <!-- PREVIEW & KODE -->
+      <aside class="panel aside">
+        <div class="aside-head">
+          <h3>Preview kartu</h3>
+          <span class="chip">update langsung</span>
+        </div>
+
+        <article class="coin-card preview-card" id="previewCard">
+          <div class="coin-top">
+            <div class="avatar avatar-lg" id="previewAvatar">P</div>
+            <div class="coin-title">
+              <strong id="previewName">Nama coin</strong>
+              <span class="mono muted" id="previewSymbol">$TICKER</span>
+            </div>
+            <span class="badge badge-new">BARU</span>
+          </div>
+          <p class="coin-desc" id="previewDesc">Deskripsi coin akan muncul di sini.</p>
+          <div class="mini-chart" id="previewChart"></div>
+          <div class="coin-meta">
+            <div><span class="muted">Market cap</span><strong id="previewMcap">$0</strong></div>
+            <div><span class="muted">Dev buy</span><strong id="previewDev">0.5 SOL</strong></div>
+          </div>
+          <div class="progress"><div class="progress-bar" id="previewProgress" style="width:0%"></div></div>
+          <div class="coin-foot">
+            <span class="mono muted">oleh kamu</span>
+            <span class="mono muted" id="previewProgressLabel">0% menuju Raydium</span>
+          </div>
+        </article>
+
+        <div class="code-block">
+          <div class="code-tabs" id="codeTabs">
+            <button class="code-tab is-active" data-code="curl">cURL</button>
+            <button class="code-tab" data-code="js">JS</button>
+            <button class="code-tab" data-code="cli">CLI</button>
+            <button class="code-copy" id="copyCode" title="Salin kode">salin</button>
+          </div>
+          <pre class="code" id="codeOut"><code>memuat…</code></pre>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────── HOW ─────────────────────────── -->
+  <section class="section how" id="how">
+    <h2>Cara kerjanya</h2>
+    <div class="steps">
+      <article class="step">
+        <span class="step-num">01</span>
+        <h3>Isi form</h3>
+        <p>Nama, ticker, deskripsi, gambar, plus dev buy. Gambar & metadata diunggah ke IPFS lewat API pump.fun.</p>
+      </article>
+      <article class="step">
+        <span class="step-num">02</span>
+        <h3>Transaksi <code>create_v2</code></h3>
+        <p>Server membangun instruksi lewat <code>@pump-fun/pump-sdk</code>, menandatangani dengan wallet launcher, lalu mengirim ke Solana.</p>
+      </article>
+      <article class="step">
+        <span class="step-num">03</span>
+        <h3>Curve hidup</h3>
+        <p>Token langsung diperdagangkan di bonding curve. Begitu 85 SOL terkumpul, likuiditas pindah otomatis ke Raydium.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────── API ─────────────────────────── -->
+  <section class="section api" id="api">
+    <div class="section-head">
+      <div>
+        <h2>Pakai sebagai API</h2>
+        <p class="section-sub">Endpoint yang sama dipakai dashboard ini. Cocok untuk bot Telegram/Discord.</p>
+      </div>
+    </div>
+    <div class="api-grid" id="apiGrid">
+      <div class="api-item"><span class="method get">GET</span><code>/api/status</code><p>Network, wallet launcher, saldo, mode simulasi.</p></div>
+      <div class="api-item"><span class="method get">GET</span><code>/api/coins</code><p>Riwayat launch + data contoh untuk papan.</p></div>
+      <div class="api-item"><span class="method post">POST</span><code>/api/quote</code><p>Estimasi token & market cap untuk jumlah dev buy.</p></div>
+      <div class="api-item"><span class="method post">POST</span><code>/api/launch</code><p>Buat coin (metadata + transaksi on-chain).</p></div>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────── FAQ ─────────────────────────── -->
+  <section class="section faq" id="faq">
+    <h2>Pertanyaan yang sering muncul</h2>
+    <details>
+      <summary>Apakah ini butuh smart contract sendiri?</summary>
+      <p>Tidak. Token pump.fun dibuat oleh program resmi <code>6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P</code>. Yang kamu butuhkan hanya klien yang membangun instruksi <code>create_v2</code> — itu yang dilakukan <code>src/launch.ts</code> di repo ini.</p>
+    </details>
+    <details>
+      <summary>Private key disimpan di mana?</summary>
+      <p>Hanya di server (file <code>data/launcher.json</code> atau env <code>LAUNCHER_SECRET_KEY</code>), tidak pernah dikirim ke browser. Untuk produksi gunakan KMS/HSM dan batasi <code>MAX_DEV_BUY_SOL</code>.</p>
+    </details>
+    <details>
+      <summary>Kenapa dashboard bilang "SIMULASI"?</summary>
+      <p>Wallet launcher belum diset atau saldonya 0, jadi transaksi tidak dikirim ke blockchain. Semua alur (metadata, estimasi, UI) tetap berjalan supaya bisa dicoba tanpa risiko.</p>
+    </details>
+    <details>
+      <summary>Bisa untuk devnet?</summary>
+      <p>Bisa. Set <code>NETWORK=devnet</code>, <code>RPC_URL</code> devnet, lalu jalankan <code>npm run wallet:new</code> dan minta airdrop. Gunakan <code>METADATA_PROVIDER=self</code> karena IPFS pump.fun hanya untuk mainnet.</p>
+    </details>
+    <details>
+      <summary>Berapa biayanya?</summary>
+      <p>Sekitar 0.002–0.004 SOL untuk signature + rent account, ditambah dev buy (kalau ada) dan priority fee. pump.fun mengambil fee dari setiap transaksi trading, bukan dari pembuatan token.</p>
+    </details>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="footer-brand">
+    <span class="brand-text">pumping<span>.fun</span></span>
+    <p class="muted">Launcher pump.fun open-source. Bukan afiliasi resmi pump.fun. DYOR — memecoin sangat volatil.</p>
+  </div>
+  <div class="footer-links">
+    <a href="https://github.com/SLREV/pumping.fun" target="_blank" rel="noreferrer">GitHub repo</a>
+    <a href="https://pump.fun" target="_blank" rel="noreferrer">pump.fun</a>
+    <a href="https://www.npmjs.com/package/@pump-fun/pump-sdk" target="_blank" rel="noreferrer">SDK di npm</a>
+    <a href="#api">API</a>
+  </div>
+</footer>
+
+<!-- ─────────────────────────── MODALS ─────────────────────────── -->
+<div class="modal" id="detailModal" hidden>
+  <div class="modal-backdrop" data-close></div>
+  <div class="modal-card modal-wide" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
+    <button class="modal-close" data-close aria-label="Tutup">✕</button>
+    <div id="detailBody"></div>
+  </div>
+</div>
+
+<div class="modal" id="successModal" hidden>
+  <div class="modal-backdrop" data-close></div>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="successTitle">
+    <div class="success-burst" id="successBurst" aria-hidden="true"></div>
+    <div class="success-icon" id="successIcon">🚀</div>
+    <h3 id="successTitle">Coin terkirim!</h3>
+    <p class="muted" id="successSub">Transaksi sudah dikonfirmasi.</p>
+    <div class="kv" id="successKv"></div>
+    <div class="modal-actions" id="successActions"></div>
+  </div>
+</div>
+
+<div class="toast-stack" id="toasts" aria-live="polite"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
